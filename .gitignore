@@ -1,0 +1,27 @@
+# Compilados de Maven
+target/
+*.class
+
+# Herramientas de generación de entregables (Node)
+node_modules/
+Entrega_Parcial2/_build/
+
+# Bases de datos SQLite locales (se recrean solas con Flyway + datos de ejemplo)
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# Artefactos de la herramienta de actualización de Java
+.github/java-upgrade/
+.github/modernize/
+effective-pom
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
