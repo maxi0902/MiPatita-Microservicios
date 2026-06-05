@@ -1,141 +1,125 @@
-# Guión de la Presentación — Parcial 2 (15 minutos)
-## App MiPatita · Arquitectura de Microservicios
+# Guión de la Presentación — MiPatita (15 minutos)
+## Versión fácil de explicar · 4 partes asignadas por dificultad
 
-**Cómo usar este guión:** está dividido en **5 bloques**, uno por persona. Está escrito para
-sonar **natural** (no lo lean palabra por palabra como robot; úsenlo de apoyo y digan las
-ideas con sus palabras). Cada bloque dice **qué mostrar en pantalla** y dura **~3 minutos**.
-Si exponen menos personas, junten bloques. Antes de empezar: **dejen los dos servicios
-corriendo** (Mascotas en 8081 y MiPatita en 8080) y Postman abierto.
+**Reparto:**
+| Parte | Quién | Dificultad | Tema |
+|---|---|---|---|
+| 1 | **Rodrigo** | 🟢 Fácil | Introducción + qué es la app + diagrama |
+| 2 | **Camila** | 🟡 Media | Microservicio Mascotas + las 3 capas + base de datos |
+| 3 | **Constanza** | 🟡 Media | MiPatita + validaciones + seguridad |
+| 4 | **Maxi** | 🔴 Difícil | Comunicación (Feign) + errores + logs + demo |
 
-> Reparto sugerido (cámbienlo libremente):
-> 1) Maximiliano · 2) Camila · 3) Rodrigo · 4) Constanza · 5) (quien quede)
-
----
-
-### 🎤 BLOQUE 1 — Introducción y arquitectura general
-**(Diapositivas: portada + diagrama de arquitectura)**
-
-"Buenas, somos el equipo de **MiPatita**, una aplicación para el cuidado de mascotas: permite
-llevar el registro de sus **paseos, comidas y recordatorios de vacunas**.
-
-Para este hito, el desafío no era inventar la app, sino **cambiar su arquitectura**: pasarla de
-un sistema único a una **arquitectura de microservicios**. ¿Qué significa eso? Que en vez de
-tener un solo programa que hace absolutamente todo, lo dividimos en **dos servicios
-independientes**, cada uno con **su propia base de datos**, que se comunican entre sí por HTTP.
-
-Como ven en el diagrama, tenemos dos piezas:
-- **MiPatita**, que corre en el puerto 8080. Es la puerta de entrada: maneja los **usuarios**,
-  la **seguridad** y la lógica de **actividades y recordatorios**.
-- **El microservicio de Mascotas**, en el puerto 8081, que se dedica **solo** a los datos de las
-  mascotas.
-
-La gracia es que están **desacoplados**: cada uno tiene su base de datos y no se meten en la
-del otro. Si uno se cae o se cambia, el otro sigue funcionando. Ahora mi compañera les va a
-mostrar cómo está hecho el microservicio de Mascotas por dentro."
+**Antes de empezar:** dejen los **dos servicios corriendo** (Mascotas 8081 y MiPatita 8080) y
+tengan **Postman abierto** (o las **capturas** listas, por si la demo en vivo no se puede).
+> No lean palabra por palabra: úsenlo de apoyo y digan las ideas con sus palabras.
 
 ---
 
-### 🎤 BLOQUE 2 — Microservicio Mascotas: capas y persistencia
-**(Diapositivas: patrón CSR + persistencia/Flyway. Mostrar el proyecto Mascotas en el editor)**
+### 🟢 PARTE 1 — RODRIGO (fácil) · ~3 min
+**Diapositivas: portada + diagrama de arquitectura**
 
-"Yo les voy a mostrar el **microservicio de Mascotas**. Está organizado con el patrón
-**CSR: Controller – Service – Repository**, que es separar el trabajo en tres capas:
+"Hola, somos el equipo de **MiPatita**. Nuestra app sirve para **cuidar mascotas**: anotar sus
+paseos, sus comidas y los recordatorios de las vacunas.
 
-- El **Controller** recibe las peticiones HTTP (por ejemplo, 'dame la lista de mascotas').
-- El **Service** tiene la lógica del negocio.
-- El **Repository** es el que habla con la base de datos.
+Para esta entrega el desafío fue cambiar **cómo está armada la app por dentro**. En vez de tener
+un solo programa que hace todo, la **dividimos en dos programas** que trabajan juntos. A eso se le
+llama **microservicios**.
 
-Cada capa tiene una sola responsabilidad; así el código queda ordenado y fácil de mantener.
+*(mostrar el diagrama)*
 
-Sobre la **base de datos**: usamos **Spring Data JPA con Hibernate** para mapear la clase
-`Mascota` a la tabla `mascotas`. Un punto importante que pidió el profe: **no dejamos que
-Hibernate cree o modifique las tablas solo** — eso es peligroso en producción. Lo apagamos con
-`ddl-auto=none` y en su lugar usamos **Flyway**, que ejecuta **scripts SQL versionados**. Acá se
-ve el script `V1__crear_tabla_mascotas.sql`: cada cambio futuro de la base sería un `V2`, un
-`V3`, etc. Así el historial de la base queda controlado y es reproducible en cualquier
-computador. De hecho, cuando arranca el servicio, Flyway crea la tabla sola. Le paso a mi
-compañero para que muestre MiPatita."
+Como ven en la imagen, son dos partes:
+- La primera, **MiPatita**, es la puerta de entrada: maneja los **usuarios**, la **seguridad**, y
+  las **actividades y recordatorios**.
+- La segunda, el **microservicio de Mascotas**, se encarga **solo de los datos de las mascotas**.
 
----
-
-### 🎤 BLOQUE 3 — MiPatita: usuarios, actividades y la capa Service
-**(Diapositivas: CSR de MiPatita. Mostrar UsuarioService y ActividadService)**
-
-"Ahora MiPatita, que es el servicio principal. Tiene la misma estructura en capas, pero acá vive
-la **lógica del negocio de la app**: los **usuarios**, las **actividades** (los paseos y comidas)
-y los **recordatorios**.
-
-Quiero detenerme en algo que el profe valora harto: **la lógica de negocio va en la capa
-Service, no en el Controller**. Por ejemplo, en `UsuarioService` está el método `autenticar`:
-ahí buscamos al usuario, comparamos la contraseña encriptada con **BCrypt** y, si está correcta,
-generamos el token. El Controller **no hace nada de eso**: solo recibe la petición y le pasa el
-trabajo al Service. ¿Por qué? Porque así el Controller se preocupa solo de HTTP, y la lógica
-queda en un solo lugar, reutilizable y fácil de testear.
-
-Lo mismo en `ActividadService`: cuando alguien registra un paseo, el servicio primero **valida
-que la mascota exista** (y eso lo hace preguntándole al otro microservicio, como van a ver
-ahora) y recién ahí guarda la actividad en su repositorio. Te paso para la parte de
-comunicación entre servicios."
+Cada una tiene **su propia base de datos** y se comunican entre ellas por internet. La ventaja:
+si una falla, la otra sigue funcionando. Ahora **Camila** les cuenta cómo está hecho el
+microservicio de Mascotas por dentro."
 
 ---
 
-### 🎤 BLOQUE 4 — Comunicación entre microservicios con Feign
-**(Diapositivas: Feign. Mostrar MascotaClient y el método saveActividad)**
+### 🟡 PARTE 2 — CAMILA (media) · ~3.5 min
+**Mostrar el proyecto Mascotas en el editor + diapositiva de capas**
 
-"Esta es una de las partes claves: **¿cómo se hablan los dos microservicios?** Usamos **Feign
-Client**, que es un cliente HTTP declarativo de Spring Cloud. En vez de escribir el código de la
-conexión a mano, declaramos una **interfaz** —`MascotaClient`— y le ponemos las anotaciones de
-los endpoints del otro servicio. Spring se encarga del resto.
+"Yo les muestro el **microservicio de Mascotas**. Está ordenado en **tres capas**, que es una
+forma de separar el trabajo:
+- El **Controller**, que recibe las peticiones (por ejemplo: 'dame la lista de mascotas').
+- El **Service**, que tiene la lógica.
+- El **Repository**, que es el que habla con la base de datos.
 
-El ejemplo concreto está en `ActividadService`: antes de guardar un paseo, llamamos a
-`mascotaClient.verificarMascota(id)`. Eso dispara una **petición HTTP real** desde MiPatita (8080)
-hacia el microservicio de Mascotas (8081). Si la mascota existe, seguimos; si no, lanzamos un
-error y **no se crea la actividad**. Esto es importante porque MiPatita **no entra a la base de
-datos de Mascotas** —no podría, son independientes—, sino que **consume su API**. Así
-mantenemos la consistencia de los datos sin compartir base de datos.
+Así cada parte hace **una sola cosa** y el código queda ordenado y fácil de mantener.
 
-Otro detalle: la URL del otro servicio **no está quemada en el código**, está en el archivo de
-configuración. Eso hace que sea fácil cambiarla si el servicio se mueve de dirección. Ahora el
-cierre con la parte de seguridad y la demo."
+Sobre la **base de datos**: usamos una herramienta que se llama **JPA**, que conecta las clases de
+Java con las tablas. Y algo importante que pidió el profe: **no dejamos que el programa cree las
+tablas solo**, porque eso es riesgoso. En su lugar usamos **Flyway**, que crea las tablas con
+**archivos ordenados por versión** (V1, V2, y así). Por eso el historial de la base queda
+controlado y se puede repetir en cualquier computador.
 
----
-
-### 🎤 BLOQUE 5 — Seguridad, manejo de errores, logs y DEMO en vivo
-**(Diapositivas: seguridad/errores. Hacer la demo en Postman)**
-
-"Cierro con la **seguridad** y una **demostración en vivo**.
-
-La seguridad es **stateless con JWT**. ¿Qué significa? Que el servidor **no guarda sesiones**:
-cuando te logueas, te devolvemos un **token** firmado, y en cada petición tú mandas ese token en
-la cabecera. Spring Security tiene una **cadena de filtros** —nuestro `JwtAuthenticationFilter`—
-que revisa ese token antes de dejarte pasar a las rutas protegidas. Las contraseñas, además,
-nunca se guardan en texto plano: se cifran con **BCrypt**.
-
-Para los errores usamos un manejo **centralizado** con `@RestControllerAdvice`: en un solo lugar
-capturamos las excepciones y devolvemos el código HTTP correcto —400 si los datos están mal, 401
-si las credenciales fallan, 404 si algo no existe—. Y para la **trazabilidad**, ambos servicios
-escriben **logs en formato JSON** con SLF4J, así se pueden leer por máquina y seguir el camino de
-una petición.
-
-**[DEMO en Postman]**
-1. Primero me **registro** y hago **login** → me devuelve el token. *(mostrar el 200 y el token)*
-2. Si pido las mascotas **sin token** → me rechaza con **403**. *(mostrarlo)*
-3. Con el token **sí** me deja, y la lista viene **desde el otro microservicio vía Feign**. *(200)*
-4. Creo un **paseo** para una mascota que existe → **201 creado**.
-5. Intento crear un paseo para una mascota que **no existe** → **400**, porque Feign avisó que no
-   está. *(mostrarlo)*
-
-Y eso es MiPatita: dos microservicios independientes, comunicados por Feign, con seguridad JWT,
-validaciones, manejo de errores centralizado y logs estructurados. ¿Consultas?"
+Ahora **Constanza** les muestra MiPatita."
 
 ---
 
-## Tips para la ronda de preguntas individuales
-- Si el profe pide **agregar un log**: abre el `Service`, agrega `log.info("...")` y muestra que
-  aparece en la consola en JSON.
-- Si pide **una validación nueva**: agrega `@NotBlank`/`@Min` en el `model`, recompila y muéstralo
-  con un **400** en Postman.
-- Si pide **cambiar un código HTTP**: en el `Controller`, cambia el `ResponseEntity.status(...)`.
-- Si pregunta **dónde está la lógica**: responde "en la capa **Service**", y muestra
-  `UsuarioService` o `ActividadService`.
-- Mantén la **calma**: si no sabes algo, explica **dónde lo buscarías** en el proyecto.
+### 🟡 PARTE 3 — CONSTANZA (media) · ~3.5 min
+**Mostrar MiPatita + diapositiva de seguridad**
+
+"Ahora **MiPatita**, el servicio principal. Acá viven los **usuarios**, las **actividades**
+(los paseos y comidas) y los **recordatorios**. Usa las mismas tres capas.
+
+Quiero destacar **dos cosas**:
+
+**Primero, las validaciones.** Antes de guardar algo, revisamos que los datos vengan bien. Por
+ejemplo, una actividad **no se puede guardar sin la fecha**. Si falta un dato obligatorio, la app
+responde con un **error claro** y no guarda datos malos.
+
+**Segundo, la seguridad.** Usamos algo que se llama **JWT**. Funciona así: cuando te **logueas**,
+te entregamos un **token**, que es como una **pulsera de acceso**. En cada petición tienes que
+mostrar ese token; si no lo tienes, **no entras**. Además, las **contraseñas se guardan
+encriptadas**, nunca en texto normal.
+
+Ahora **Maxi** les muestra la parte más interesante: cómo conversan los dos microservicios."
+
+---
+
+### 🔴 PARTE 4 — MAXI (difícil) · ~4 min
+**Mostrar MascotaClient y el manejo de errores; luego la demo o las capturas**
+
+"Cierro yo con la parte más técnica: **cómo se comunican los dos microservicios**.
+
+Usamos **Feign**, que es una forma de que MiPatita le **hable** al microservicio de Mascotas por
+internet. El ejemplo concreto: **antes de guardar un paseo**, MiPatita le pregunta al otro:
+*'¿existe esta mascota?'*. Si no existe, **no deja crear el paseo**. Lo importante es que MiPatita
+**no entra a la base de datos del otro**: solo le **pregunta** por su API. Así no comparten datos
+directamente, y se mantienen independientes.
+
+Para los **errores**, los manejamos **todos en un solo lugar**. Según lo que pase, devolvemos el
+código correcto: **400** si los datos están malos, **401** si las credenciales fallan, **404** si
+algo no existe. Y para revisar qué pasa por dentro, ambos servicios escriben **registros (logs)**
+en un formato ordenado.
+
+**[DEMOSTRACIÓN — en vivo o con capturas]**
+Para terminar, les muestro el sistema funcionando:
+1. Me **registro** y hago **login** → me entrega el **token**.
+2. Si pido las mascotas **sin token** → me rechaza con **403**.
+3. **Con** el token me deja, y la lista **viene desde el otro microservicio**.
+4. Creo un **paseo** para una mascota que existe → se crea (**201**).
+5. Intento crear uno para una mascota que **no existe** → lo rechaza (**400**), porque el otro
+   micro avisó que no está.
+
+Y eso es **MiPatita**: dos microservicios independientes, comunicados por Feign, con seguridad,
+validaciones y manejo de errores. ¿Consultas?"
+
+---
+
+## 📸 Sobre la demostración (importante)
+La demo en vivo **no es obligatoria al pie de la letra** — el profe pide mostrar el
+**funcionamiento**. Para ir seguros:
+- **Tengan capturas listas** (registro 200, login + token, GET mascotas 200, crear actividad 201,
+  crear sin un dato 400). Si la demo en vivo falla o no se puede, **muestran las capturas**.
+- Si todo está estable y el profe deja → háganla **en vivo** (queda mejor).
+- **Ojo:** la app **igual debe estar corriendo** en el PC del profe, porque después viene la
+  parte individual (preguntas + live coding) sobre la app andando.
+
+## 🎤 Después de la presentación: preguntas individuales
+El profe le pregunta a **cada uno por separado** y pide modificar código en vivo. Cada integrante
+debe poder explicar **su parte** y hacer un cambio chico (un log, una validación, un código HTTP).
+Repasen su parte + la chuleta (`05_CHULETA_PATRONES.md`) y el mapa (`06_MAPA_EXAMEN.md`).
