@@ -7,10 +7,10 @@
 | 1 | **Rodrigo** | 🟢 Fácil | Introducción + qué es la app + diagrama |
 | 2 | **Camila** | 🟡 Media | Microservicio Mascotas + las 3 capas + base de datos |
 | 3 | **Constanza** | 🟡 Media | MiPatita + validaciones + seguridad |
-| 4 | **Maxi** | 🔴 Difícil | Comunicación (Feign) + errores + logs + demo |
+| 4 | **Maxi** | 🔴 Difícil | Comunicación (Feign) + manejo de errores + logs |
 
-**Antes de empezar:** dejen los **dos servicios corriendo** (Mascotas 8081 y MiPatita 8080) y
-tengan **Postman abierto** (o las **capturas** listas, por si la demo en vivo no se puede).
+**Antes de empezar:** dejen los **dos servicios corriendo** (Mascotas 8081 y MiPatita 8080) y el
+**proyecto abierto en el editor** para mostrar el código cuando toque.
 > No lean palabra por palabra: úsenlo de apoyo y digan las ideas con sus palabras.
 
 ---
@@ -80,8 +80,8 @@ Ahora **Maxi** les muestra la parte más interesante: cómo conversan los dos mi
 
 ---
 
-### 🔴 PARTE 4 — MAXI (difícil) · ~4 min
-**Mostrar MascotaClient y el manejo de errores; luego la demo o las capturas**
+### 🔴 PARTE 4 — MAXI (difícil) · ~3.5 min
+**Mostrar MascotaClient y el manejo de errores en el editor**
 
 "Cierro yo con la parte más técnica: **cómo se comunican los dos microservicios**.
 
@@ -94,32 +94,20 @@ directamente, y se mantienen independientes.
 Para los **errores**, los manejamos **todos en un solo lugar**. Según lo que pase, devolvemos el
 código correcto: **400** si los datos están malos, **401** si las credenciales fallan, **404** si
 algo no existe. Y para revisar qué pasa por dentro, ambos servicios escriben **registros (logs)**
-en un formato ordenado.
+en un formato ordenado, lo que nos permite seguir el recorrido de una petición.
 
-**[DEMOSTRACIÓN — en vivo o con capturas]**
-Para terminar, les muestro el sistema funcionando:
-1. Me **registro** y hago **login** → me entrega el **token**.
-2. Si pido las mascotas **sin token** → me rechaza con **403**.
-3. **Con** el token me deja, y la lista **viene desde el otro microservicio**.
-4. Creo un **paseo** para una mascota que existe → se crea (**201**).
-5. Intento crear uno para una mascota que **no existe** → lo rechaza (**400**), porque el otro
-   micro avisó que no está.
+Para cerrar: todo esto funciona en conjunto. Un usuario se loguea y recibe su **token**; con ese
+token puede pedir las mascotas (que vienen del otro microservicio) y registrar sus paseos y
+recordatorios, siempre **validando los datos**. El sistema está **probado y funcionando**.
 
 Y eso es **MiPatita**: dos microservicios independientes, comunicados por Feign, con seguridad,
 validaciones y manejo de errores. ¿Consultas?"
 
 ---
 
-## 📸 Sobre la demostración (importante)
-La demo en vivo **no es obligatoria al pie de la letra** — el profe pide mostrar el
-**funcionamiento**. Para ir seguros:
-- **Tengan capturas listas** (registro 200, login + token, GET mascotas 200, crear actividad 201,
-  crear sin un dato 400). Si la demo en vivo falla o no se puede, **muestran las capturas**.
-- Si todo está estable y el profe deja → háganla **en vivo** (queda mejor).
-- **Ojo:** la app **igual debe estar corriendo** en el PC del profe, porque después viene la
-  parte individual (preguntas + live coding) sobre la app andando.
-
 ## 🎤 Después de la presentación: preguntas individuales
-El profe le pregunta a **cada uno por separado** y pide modificar código en vivo. Cada integrante
-debe poder explicar **su parte** y hacer un cambio chico (un log, una validación, un código HTTP).
+El profe le pregunta a **cada uno por separado** y pide **modificar código en vivo**. Cada
+integrante debe poder explicar **su parte** y hacer un cambio chico (un log, una validación, un
+código HTTP). La app **debe estar corriendo** en el PC del profe para esta parte.
+
 Repasen su parte + la chuleta (`05_CHULETA_PATRONES.md`) y el mapa (`06_MAPA_EXAMEN.md`).
