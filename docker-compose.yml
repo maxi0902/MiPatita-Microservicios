@@ -1,0 +1,126 @@
+# Orquestacion del ecosistema MiPatita (10 microservicios)
+# Uso:  docker compose up --build
+# El Gateway queda accesible en http://localhost:8080 y Eureka en http://localhost:8761
+
+services:
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=api-gateway
+    depends_on:
+      - eureka-server
+
+  ms-mascotas:
+    build: ./ms-mascotas
+    container_name: ms-mascotas
+    ports:
+      - "8081:8081"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=ms-mascotas
+    depends_on:
+      - eureka-server
+
+  ms-usuarios:
+    build: ./ms-usuarios
+    container_name: ms-usuarios
+    ports:
+      - "8082:8082"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=ms-usuarios
+    depends_on:
+      - eureka-server
+
+  ms-actividades:
+    build: ./ms-actividades
+    container_name: ms-actividades
+    ports:
+      - "8083:8083"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=ms-actividades
+    depends_on:
+      - eureka-server
+      - ms-mascotas
+
+  ms-comidas:
+    build: ./ms-comidas
+    container_name: ms-comidas
+    ports:
+      - "8084:8084"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=ms-comidas
+    depends_on:
+      - eureka-server
+      - ms-mascotas
+
+  ms-control-peso:
+    build: ./ms-control-peso
+    container_name: ms-control-peso
+    ports:
+      - "8085:8085"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=ms-control-peso
+    depends_on:
+      - eureka-server
+      - ms-mascotas
+
+  ms-recordatorios:
+    build: ./ms-recordatorios
+    container_name: ms-recordatorios
+    ports:
+      - "8086:8086"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=ms-recordatorios
+    depends_on:
+      - eureka-server
+      - ms-mascotas
+
+  ms-vacunas:
+    build: ./ms-vacunas
+    container_name: ms-vacunas
+    ports:
+      - "8087:8087"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=ms-vacunas
+    depends_on:
+      - eureka-server
+      - ms-mascotas
+
+  ms-notificaciones:
+    build: ./ms-notificaciones
+    container_name: ms-notificaciones
+    ports:
+      - "8088:8088"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=ms-notificaciones
+    depends_on:
+      - eureka-server
+      - ms-recordatorios
+      - ms-vacunas

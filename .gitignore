@@ -1,27 +1,26 @@
 # Compilados de Maven
 target/
-*.class
+!.mvn/wrapper/maven-wrapper.jar
 
-# Herramientas de generación de entregables (Node)
-node_modules/
-Entrega_Parcial2/_build/
-
-# Bases de datos SQLite locales (se recrean solas con Flyway + datos de ejemplo)
+# Bases de datos SQLite generadas en tiempo de ejecucion
 *.db
 
 # IDE
-.vscode/
 .idea/
 *.iml
+.vscode/
+.classpath
+.project
+.settings/
 
 # Logs
 *.log
 
-# Artefactos de la herramienta de actualización de Java
-.github/java-upgrade/
-.github/modernize/
-effective-pom
-
 # Sistema operativo
 .DS_Store
 Thumbs.db
+
+# Materiales de presentacion y entrega (no son codigo fuente)
+*.docx
+*.pptx
+*.zip
